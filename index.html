@@ -15,6 +15,28 @@
   .header p  { color: #94a3b8; font-size: 14px; margin-top: 6px; }
   .badge { display: inline-block; background: #312e81; color: #a5b4fc; font-size: 11px; font-weight: 600; padding: 2px 10px; border-radius: 20px; margin-right: 8px; margin-top: 10px; letter-spacing: 0.5px; }
 
+  /* Dedup card */
+  .dedup-card { background: #1e1e2e; border: 1px solid #2d2d44; border-radius: 14px; padding: 22px; margin-bottom: 22px; }
+  .dedup-card h2 { font-size: 13px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 18px; }
+  .dedup-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; }
+  .dedup-col { padding: 0 20px; border-right: 1px solid #2d2d44; }
+  .dedup-col:first-child { padding-left: 0; }
+  .dedup-col:last-child { border-right: none; }
+  .dedup-col .dc-label { font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+  .dedup-col .dc-val { font-size: 26px; font-weight: 700; }
+  .dedup-col .dc-sub { font-size: 12px; color: #475569; margin-top: 4px; line-height: 1.5; }
+  .dedup-flow { display: flex; align-items: center; gap: 12px; margin-top: 20px; padding-top: 18px; border-top: 1px solid #2d2d44; flex-wrap: wrap; }
+  .flow-item { background: #16162a; border: 1px solid #2d2d44; border-radius: 8px; padding: 10px 16px; text-align: center; flex: 1; min-width: 120px; }
+  .flow-item .fi-val { font-size: 18px; font-weight: 700; }
+  .flow-item .fi-lbl { font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 0.4px; margin-top: 2px; }
+  .flow-arrow { color: #334155; font-size: 20px; flex-shrink: 0; }
+  .flow-minus { background: #1c1010; border: 1px solid #3d1515; border-radius: 8px; padding: 10px 16px; text-align: center; flex: 1; min-width: 120px; }
+  .flow-minus .fi-val { font-size: 18px; font-weight: 700; color: #f87171; }
+  .flow-minus .fi-lbl { font-size: 10px; color: #7f1d1d; text-transform: uppercase; letter-spacing: 0.4px; margin-top: 2px; }
+  .flow-result { background: #0f1e0f; border: 1px solid #14532d; border-radius: 8px; padding: 10px 16px; text-align: center; flex: 1; min-width: 120px; }
+  .flow-result .fi-val { font-size: 18px; font-weight: 700; color: #4ade80; }
+  .flow-result .fi-lbl { font-size: 10px; color: #166534; text-transform: uppercase; letter-spacing: 0.4px; margin-top: 2px; }
+
   /* Toggle */
   .toggle-bar { display: flex; align-items: center; gap: 16px; margin-bottom: 28px; background: #1e1e2e; border: 1px solid #2d2d44; border-radius: 12px; padding: 16px 20px; }
   .toggle-label { font-size: 14px; color: #94a3b8; }
@@ -73,6 +95,44 @@
     <p>WARM/subscribed lists · HubSpot + Mailchimp · Fully deduplicated unique contacts</p>
     <span class="badge">WARM SUBSCRIBERS</span>
     <span class="badge">2026-06-11</span>
+  </div>
+
+  <!-- Deduplication breakdown -->
+  <div class="dedup-card">
+    <h2>Raw Data → Deduplication Breakdown</h2>
+    <div class="dedup-grid">
+      <div class="dedup-col">
+        <div class="dc-label">HubSpot Export</div>
+        <div class="dc-val" style="color:#6366f1;">41,537</div>
+        <div class="dc-sub">41,406 unique emails<br>131 rows with no/invalid email</div>
+      </div>
+      <div class="dedup-col">
+        <div class="dc-label">Mailchimp (3 files)</div>
+        <div class="dc-val" style="color:#f59e0b;">35,914</div>
+        <div class="dc-sub">30,805 subscribed<br>2,490 cleaned · 2,619 unsubscribed</div>
+      </div>
+      <div class="dedup-col">
+        <div class="dc-label">In Both CRMs (overlap)</div>
+        <div class="dc-val" style="color:#f87171;">31,959</div>
+        <div class="dc-sub">Same person in HubSpot AND Mailchimp — Mailchimp list was imported into HubSpot, counted twice in the raw 77K</div>
+      </div>
+      <div class="dedup-col">
+        <div class="dc-label">True Unique People</div>
+        <div class="dc-val" style="color:#4ade80;">45,361</div>
+        <div class="dc-sub">HubSpot-only: 9,447<br>Mailchimp-only: 3,955<br>In both CRMs: 31,959</div>
+      </div>
+    </div>
+    <div class="dedup-flow">
+      <div class="flow-item"><div class="fi-val" style="color:#6366f1;">41,406</div><div class="fi-lbl">HubSpot unique</div></div>
+      <div class="flow-arrow">+</div>
+      <div class="flow-item"><div class="fi-val" style="color:#f59e0b;">35,914</div><div class="fi-lbl">Mailchimp unique</div></div>
+      <div class="flow-arrow">=</div>
+      <div class="flow-item"><div class="fi-val" style="color:#94a3b8;">77,320</div><div class="fi-lbl">Raw combined</div></div>
+      <div class="flow-arrow">−</div>
+      <div class="flow-minus"><div class="fi-val">31,959</div><div class="fi-lbl">Cross-CRM duplicates</div></div>
+      <div class="flow-arrow">=</div>
+      <div class="flow-result"><div class="fi-val">45,361</div><div class="fi-lbl">Final unique contacts</div></div>
+    </div>
   </div>
 
   <!-- Toggle -->
