@@ -77,6 +77,18 @@
   .legend-table td { padding: 6px 7px; border-bottom: 1px solid #1a1a2e; vertical-align: middle; }
   .legend-table tr:last-child td { border-bottom: none; }
   .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; margin-right: 7px; }
+  .persona-main-row { cursor: pointer; transition: background 0.15s; }
+  .persona-main-row:hover td { background: rgba(99,102,241,0.07); }
+  .persona-expand-icon { font-size: 9px; color: #475569; margin-left: 5px; display: inline-block; transition: transform 0.2s; }
+  .persona-expand-icon.open { transform: rotate(90deg); color: #a5b4fc; }
+  .persona-detail-row td { padding: 0 !important; border-bottom: 2px solid #2d2d44 !important; }
+  .persona-detail-inner { background: #13131f; padding: 14px 20px 18px; }
+  .persona-detail-inner .detail-header { font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 12px; }
+  .persona-detail-inner .title-row { margin-bottom: 7px; }
+  .persona-detail-inner .title-label { display: flex; justify-content: space-between; font-size: 11px; color: #94a3b8; margin-bottom: 3px; }
+  .persona-detail-inner .title-count { font-weight: 600; }
+  .persona-detail-inner .title-track { background: #1e1e2e; border-radius: 3px; height: 5px; overflow: hidden; }
+  .persona-detail-inner .title-fill { height: 100%; border-radius: 3px; }
 
   /* Source block */
   .source-block { display: flex; gap: 12px; margin-top: 12px; }
@@ -195,7 +207,7 @@
       </div>
     </div>
     <div class="card" style="overflow-y:auto;max-height:520px;">
-      <h2>Full Persona Table</h2>
+      <h2>Full Persona Table <span style="font-size:10px;color:#475569;font-weight:400;text-transform:none;letter-spacing:0;">· click any row to see job titles</span></h2>
       <table class="legend-table">
         <thead><tr><th></th><th>Persona</th><th style="text-align:right">Count</th><th style="text-align:right">% of All</th></tr></thead>
         <tbody id="personaTableBody"></tbody>
@@ -249,6 +261,29 @@ const DATA = {
     geos: {"United States":27598,"Canada":1853,"India":499,"United Kingdom":431,"South Africa":285,"Australia":229,"Germany":129,"PK":106,"NG":106,"MEX":85},
     sources: {"HubSpot":41406,"Mailchimp":3955},
   }
+};
+
+// Top job titles per persona (from warm audience analysis)
+const PERSONA_TITLES = {
+  "HR Director": {"HR Director":746,"Director of Human Resources":376,"Human Resources Director":357,"Director, Human Resources":253,"Director of HR":166,"Director, HR":72,"Director of People Operations":49,"Director, People Operations":39,"Director Of Human Resources":39,"Director of Learning and Development":37,"Director, People & Culture":36,"Director HR":34,"Director of People":30,"Director, People":30,"Senior Director, Human Resources":28,"Director, Learning & Development":28,"Director of People & Culture":28,"Director Human Resources":28,"Director, Talent Management":27,"Senior Director Human Resources":26},
+  "Other HR / People": {"HR":288,"Human Resources Business Partner":204,"Manager, Human Resources":125,"Human Resources":98,"Senior Human Resources Business Partner":83,"Human Resources Specialist":57,"Human Resources Coordinator":47,"HR Analyst":38,"HRD":36,"Senior Manager, Human Resources":36,"HR Supervisor":28,"HR Partner":25,"HRM":23,"HR Associate":22,"HRIS Analyst":22,"HR Leader":19,"HR Officer":18,"HR Program Manager":18,"Human Resources Assistant":17,"Human Resources Administrator":16},
+  "VP HR / Head of People": {"Vice President Human Resources":104,"Head of People":82,"Head of HR":76,"Vice President, Human Resources":70,"VP of HR":69,"VP HR":67,"VP":63,"VP, Human Resources":59,"Vice President":44,"VP, HR":40,"Head of Human Resources":38,"VP of Human Resources":37,"VP, People":35,"Vice President of Human Resources":34,"VP Human Resources":32,"Head of People Operations":29,"VP, People & Culture":24,"VP of People":22,"VP People":20,"Head of People & Culture":16},
+  "HR Manager": {"HR Manager":1244,"Human Resources Manager":490,"Senior Human Resources Manager":65,"Senior HR Manager":55,"Regional HR Manager":26,"Sr. HR Manager":22,"HR manager":18,"Hr manager":15,"People Manager":13,"HR MANAGER":13,"Sr HR Manager":12,"HR Mgr":11,"Regional Human Resources Manager":10,"Corporate HR Manager":9,"Sr. Human Resources Manager":8,"Senior People Manager":6,"SR HR Manager":6,"Hr Manager":6},
+  "L&D / Training": {"Learning and Development Manager":58,"Training Manager":53,"Training Specialist":47,"Instructional Designer":38,"Learning & Development Manager":34,"L&D Manager":31,"Training Coordinator":28,"L&D":23,"Learning & Development Specialist":22,"Manager, Learning & Development":19,"Training and Development Manager":15,"Training and Development Specialist":14,"Learning and Development Specialist":13,"Chief Learning Officer":13,"Training & Development Manager":12,"Learning Specialist":12,"Learning Experience Designer":10,"Leadership Development Manager":9,"L&D Business Partner":9},
+  "HR Generalist": {"HR Generalist":489,"HR Coordinator":148,"HR Specialist":121,"Human Resources Generalist":118,"HR Assistant":58,"Senior Human Resources Generalist":57,"Senior HR Generalist":42,"HR Administrator":36,"Sr. HR Generalist":21,"HR Generalist II":14,"Senior HR Specialist":13,"Sr HR Generalist":10,"HR Admin":9,"Sr. HR Specialist":6,"HR GENERALIST":6,"Sr HR Specialist":5},
+  "HRBP": {"HR Business Partner":344,"HRBP":271,"Senior HR Business Partner":61,"Senior HRBP":42,"Sr. HR Business Partner":30,"Sr. HRBP":28,"People Business Partner":26,"People Partner":20,"Sr HRBP":12,"Manager, HR Business Partner":10,"Senior People Partner":10,"Sr HR Business Partner":8,"Sr. People Business Partner":7,"Senior People Business Partner":6,"Strategic HR Business Partner":6,"HRBP Manager":6,"Senior Manager, HRBP":6,"Lead HR Business Partner":6,"Global HR Business Partner":6},
+  "Total Rewards / Benefits": {"Benefits Manager":53,"Wellness Coordinator":22,"Payroll Manager":17,"Benefits Specialist":17,"Total Rewards Manager":16,"Compensation Analyst":16,"Director, Total Rewards":12,"Benefits Administrator":12,"Wellness Program Manager":11,"Benefits Analyst":10,"Payroll Specialist":9,"Senior Director, Total Rewards":8,"Senior Manager, Total Rewards":8,"Senior Compensation Analyst":7,"Wellness Specialist":7,"Wellness Manager":7,"Manager, Benefits":7,"Compensation Manager":6,"Wellbeing Coordinator":6},
+  "CHRO / CPO / Chief People": {"Chief People Officer":338,"Chief Human Resources Officer":157,"CHRO":156,"CPO":34,"Chief Talent Officer":21,"Chief People & Culture Officer":14,"Chief People and Culture Officer":9,"Global Chief People Officer":6,"Chief HR Officer":6,"EVP & CHRO":6,"SVP, Chief Human Resources Officer":4,"SVP, CHRO":4,"Chro":3,"Chief HR":3,"Chief People and Brand Officer":2},
+  "Employee Experience": {"Employee Experience Manager":41,"People & Culture Manager":30,"People and Culture Manager":29,"Employee Engagement Manager":18,"Employee Experience Specialist":18,"Employee Engagement Specialist":17,"Manager, People & Culture":12,"Chief Culture Officer":11,"Senior Manager, People & Culture":8,"Employee Experience Coordinator":8,"Employee Experience Lead":7,"People & Culture Specialist":7,"Employee Experience":7,"People & Culture Coordinator":6,"People & Culture":6},
+  "DEI / Diversity": {"DEI Manager":11,"Chief Diversity Officer":11,"Diversity, Equity and Inclusion Manager":7,"DEI Program Manager":6,"DEI Specialist":5,"Supplier Diversity Specialist":4,"Director of Inclusion":3,"DEI Coordinator":3,"Diversity & Inclusion Manager":3,"Diversity Manager":3,"DEIB Program Manager":3,"Chief Diversity, Equity and Inclusion Officer":2,"DEI Programs Manager":2,"Equity Officer":2,"Program Manager, Talent Diversity, Advancement and Retention":2},
+  "Talent Management": {"Talent Development Manager":37,"Talent Development Specialist":21,"Manager, Talent Management":11,"Manager, Talent Development":10,"Talent Management Specialist":10,"Senior Manager, Talent Management":8,"Head of Talent Development":8,"Talent Management":8,"Head of Talent Management":7,"Talent Management Lead":7,"Talent Management Partner":7,"Senior Talent Development Specialist":5,"Senior Manager, Talent Development":5,"Senior Talent Development Manager":5},
+  "SVP / EVP HR": {"Senior Vice President":20,"SVP":19,"Senior Vice President Human Resources":15,"Senior Vice President, Human Resources":8,"SVP, Human Resources":7,"SVP, People & Culture":7,"SVP HR":6,"SVP Human Resources":6,"SVP of People":6,"SVP, People":6,"EVP":6,"Senior Vice President, People & Culture":6,"EVP, HR":4,"EVP, Human Resources":4,"SVP of Human Resources":3},
+  "People Ops": {"People Operations Manager":79,"People Operations Specialist":24,"People Operations Generalist":20,"Senior Manager, People Operations":17,"People Operations Coordinator":16,"Senior People Operations Manager":13,"People Operations":12,"People Operations Lead":12,"Manager, People Operations":8,"People Ops Manager":8,"People Ops":6,"People Operations Partner":5,"People Operations Administrator":5,"People Operations Leader":5},
+  "COO / Chief of Staff": {"COO":57,"Chief Operating Officer":38,"Chief of Staff":36,"Chief Of Staff":10,"Chief Operations Officer":7,"coo":3,"Chief of staff":2,"Chief People Officer & Interim COO":2,"Chief of Staff and Operations Leader":2,"Co-Founder & COO":2,"Deputy Chief of Staff":2},
+  "Org Development": {"Organizational Development Manager":20,"Organizational Development Specialist":19,"Manager, Organizational Development":12,"Manager, Organizational Effectiveness":7,"Organizational Development Coordinator":4,"Manager of Organizational Development":4,"Organizational Development Business Partner":3,"Change Management Lead":3,"Change Management Specialist":3,"Manager Organizational Development":3},
+  "Other / Out of Scope": {"Director":421,"CEO":377,"Manager":298,"Founder":238,"President":232,"Owner":165,"Principal":117,"Executive Director":113,"Program Manager":103,"Managing Director":88,"Partner":76,"Executive Assistant":70,"Operations Manager":67,"Supervisor":67,"Office Manager":65,"Project Manager":65,"General Manager":64,"Founder & CEO":64,"Senior Manager":53},
+  "Exclude": {"Consultant":359,"Student":195,"HR Consultant":159,"Recruiter":133,"Talent Acquisition Manager":109,"Talent Acquisition Specialist":74,"Account Executive":60,"Human Resources Consultant":53,"Director, Talent Acquisition":44,"Principal Consultant":43,"HR Advisor":40,"Senior Consultant":35,"Advisor":34,"Talent Acquisition Partner":33,"Coach":31,"Senior Recruiter":30,"Director of Talent Acquisition":30},
+  "No Title": {}
 };
 
 const COLORS = ['#6366f1','#8b5cf6','#a78bfa','#c4b5fd','#f59e0b','#fbbf24','#34d399','#10b981','#fb923c','#f87171','#38bdf8','#60a5fa','#e879f9','#f472b6','#4ade80','#22d3ee','#facc15','#a3e635','#fb7185'];
@@ -325,12 +360,58 @@ function mkSourceChart(sources) {
 
 function mkPersonaTable(personas, total) {
   const tbody = document.getElementById('personaTableBody');
+  // remember which rows were open
+  const openRows = new Set(
+    [...document.querySelectorAll('.persona-detail-row')].filter(r => r.style.display !== 'none').map(r => r.dataset.persona)
+  );
   tbody.innerHTML = '';
   Object.entries(personas).sort((a,b)=>b[1]-a[1]).forEach(([name,count],i) => {
     const isNoise = NOISE.has(name);
     const color   = isNoise ? NOISE_COLORS[['Other / Out of Scope','Exclude','No Title'].indexOf(name)] : COLORS[i % COLORS.length];
-    tbody.innerHTML += `<tr><td><span class="dot" style="background:${color}"></span></td><td>${name}</td><td style="color:${color};font-weight:600;text-align:right;">${count.toLocaleString()}</td><td style="color:#64748b;text-align:right;">${(count/total*100).toFixed(1)}%</td></tr>`;
+    const hasTitles = PERSONA_TITLES[name] && Object.keys(PERSONA_TITLES[name]).length > 0;
+    const rid = 'pd_' + name.replace(/[^a-z0-9]/gi,'_');
+    const isOpen = openRows.has(name);
+    tbody.innerHTML += `
+      <tr class="persona-main-row" onclick="${hasTitles ? `togglePersonaDetail('${rid}','${name}')` : ''}">
+        <td><span class="dot" style="background:${color}"></span></td>
+        <td>${name}${hasTitles ? `<span class="persona-expand-icon${isOpen?' open':''}">▶</span>` : ''}</td>
+        <td style="color:${color};font-weight:600;text-align:right;">${count.toLocaleString()}</td>
+        <td style="color:#64748b;text-align:right;">${(count/total*100).toFixed(1)}%</td>
+      </tr>
+      <tr class="persona-detail-row" id="${rid}" data-persona="${name}" style="display:${isOpen?'table-row':'none'};">
+        <td colspan="4"><div class="persona-detail-inner" id="${rid}_inner">${isOpen ? renderPersonaDetailHTML(name, color) : ''}</div></td>
+      </tr>`;
   });
+}
+
+function renderPersonaDetailHTML(name, color) {
+  const titles = PERSONA_TITLES[name] || {};
+  const entries = Object.entries(titles).slice(0, 20);
+  if (!entries.length) return '<div class="persona-detail-inner"><div class="detail-header">No title data available</div></div>';
+  const maxCount = entries[0][1];
+  let html = `<div class="detail-header">Top job titles · ${name}</div>`;
+  entries.forEach(([title, count]) => {
+    const pct = (count / maxCount * 100).toFixed(0);
+    html += `<div class="title-row"><div class="title-label"><span>${title}</span><span class="title-count" style="color:${color};">${count.toLocaleString()}</span></div><div class="title-track"><div class="title-fill" style="width:${pct}%;background:${color};opacity:0.7;"></div></div></div>`;
+  });
+  return html;
+}
+
+function togglePersonaDetail(rid, name) {
+  const row = document.getElementById(rid);
+  const inner = document.getElementById(rid + '_inner');
+  const icon = row.previousElementSibling.querySelector('.persona-expand-icon');
+  if (row.style.display === 'none') {
+    row.style.display = 'table-row';
+    if (icon) icon.classList.add('open');
+    // get color from the dot in the parent row
+    const dot = row.previousElementSibling.querySelector('.dot');
+    const color = dot ? dot.style.background : '#6366f1';
+    inner.innerHTML = renderPersonaDetailHTML(name, color);
+  } else {
+    row.style.display = 'none';
+    if (icon) icon.classList.remove('open');
+  }
 }
 
 function mkTargetBars(validPersonas) {
