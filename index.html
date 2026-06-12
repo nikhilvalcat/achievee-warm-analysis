@@ -7,404 +7,331 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    background: #0f0f17;
-    color: #e2e8f0;
-    min-height: 100vh;
-    padding: 32px 24px;
-  }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f0f17; color: #e2e8f0; min-height: 100vh; padding: 32px 24px; }
   .page { max-width: 1200px; margin: 0 auto; }
 
-  /* Header */
-  .header { margin-bottom: 36px; }
+  .header { margin-bottom: 28px; }
   .header h1 { font-size: 28px; font-weight: 700; color: #f8fafc; letter-spacing: -0.5px; }
   .header p  { color: #94a3b8; font-size: 14px; margin-top: 6px; }
-  .badge {
-    display: inline-block; background: #312e81; color: #a5b4fc;
-    font-size: 11px; font-weight: 600; padding: 2px 10px; border-radius: 20px;
-    margin-right: 8px; margin-top: 10px; letter-spacing: 0.5px;
-  }
+  .badge { display: inline-block; background: #312e81; color: #a5b4fc; font-size: 11px; font-weight: 600; padding: 2px 10px; border-radius: 20px; margin-right: 8px; margin-top: 10px; letter-spacing: 0.5px; }
 
-  /* Stat cards */
-  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
-  .stat-card {
-    background: #1e1e2e; border: 1px solid #2d2d44; border-radius: 12px;
-    padding: 20px; text-align: center;
-  }
-  .stat-card .val { font-size: 32px; font-weight: 700; color: #a5b4fc; }
-  .stat-card .lbl { font-size: 12px; color: #64748b; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+  /* Toggle */
+  .toggle-bar { display: flex; align-items: center; gap: 16px; margin-bottom: 28px; background: #1e1e2e; border: 1px solid #2d2d44; border-radius: 12px; padding: 16px 20px; }
+  .toggle-label { font-size: 14px; color: #94a3b8; }
+  .toggle-label strong { color: #e2e8f0; }
+  .switch { position: relative; display: inline-block; width: 48px; height: 26px; flex-shrink: 0; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .slider { position: absolute; cursor: pointer; inset: 0; background: #334155; border-radius: 26px; transition: .3s; }
+  .slider:before { position: absolute; content: ''; height: 20px; width: 20px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: .3s; }
+  input:checked + .slider { background: #6366f1; }
+  input:checked + .slider:before { transform: translateX(22px); }
+  .unsub-pill { background: #450a0a; color: #fca5a5; font-size: 12px; padding: 3px 10px; border-radius: 20px; font-weight: 500; }
+  .unsub-pill.on { background: #1e1b4b; color: #a5b4fc; }
 
-  /* Chart grid */
-  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
-  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; margin-bottom: 24px; }
-  .full    { margin-bottom: 24px; }
+  /* Stats */
+  .stats-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-bottom: 28px; }
+  .stat-card { background: #1e1e2e; border: 1px solid #2d2d44; border-radius: 12px; padding: 18px; text-align: center; }
+  .stat-card .val { font-size: 28px; font-weight: 700; color: #a5b4fc; }
+  .stat-card .lbl { font-size: 11px; color: #64748b; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .stat-card .sub-val { font-size: 12px; color: #475569; margin-top: 2px; }
 
-  .card {
-    background: #1e1e2e; border: 1px solid #2d2d44; border-radius: 14px; padding: 24px;
-  }
-  .card h2 {
-    font-size: 14px; font-weight: 600; color: #94a3b8;
-    text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 20px;
-  }
-  .chart-wrap { position: relative; }
+  /* Grid */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; margin-bottom: 22px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 22px; margin-bottom: 22px; }
+  .full    { margin-bottom: 22px; }
+  .card { background: #1e1e2e; border: 1px solid #2d2d44; border-radius: 14px; padding: 22px; }
+  .card h2 { font-size: 13px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 18px; }
+  .note { font-size: 11px; color: #f59e0b; margin-bottom: 10px; }
 
-  /* Legend table */
-  .legend-table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 13px; }
-  .legend-table th { color: #64748b; font-weight: 500; text-align: left; padding: 6px 8px; border-bottom: 1px solid #2d2d44; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
-  .legend-table td { padding: 7px 8px; border-bottom: 1px solid #1a1a2e; vertical-align: middle; }
-  .legend-table tr:last-child td { border-bottom: none; }
-  .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 8px; flex-shrink: 0; }
-  .persona-row td:nth-child(2) { color: #e2e8f0; }
-  .persona-row td:nth-child(3) { color: #6366f1; font-weight: 600; text-align: right; }
-  .persona-row td:nth-child(4) { color: #64748b; text-align: right; }
-
-  /* Progress bars */
-  .bar-row { margin-bottom: 12px; }
+  /* Bars */
+  .bar-row { margin-bottom: 10px; }
   .bar-row .bar-label { font-size: 12px; color: #94a3b8; margin-bottom: 4px; display: flex; justify-content: space-between; }
-  .bar-track { background: #2d2d44; border-radius: 4px; height: 8px; overflow: hidden; }
-  .bar-fill  { height: 100%; border-radius: 4px; transition: width 0.6s ease; }
+  .bar-track { background: #2d2d44; border-radius: 4px; height: 7px; overflow: hidden; }
+  .bar-fill  { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
 
-  /* Source badge */
-  .source-block { display: flex; gap: 16px; margin-top: 10px; }
-  .source-item { flex: 1; background: #16162a; border: 1px solid #2d2d44; border-radius: 10px; padding: 16px; text-align: center; }
-  .source-item .sv { font-size: 26px; font-weight: 700; }
-  .source-item .sl { font-size: 11px; color: #64748b; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+  /* Table */
+  .legend-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .legend-table th { color: #64748b; font-weight: 500; text-align: left; padding: 5px 7px; border-bottom: 1px solid #2d2d44; font-size: 10px; text-transform: uppercase; }
+  .legend-table td { padding: 6px 7px; border-bottom: 1px solid #1a1a2e; vertical-align: middle; }
+  .legend-table tr:last-child td { border-bottom: none; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; margin-right: 7px; }
 
-  /* Footer */
+  /* Source block */
+  .source-block { display: flex; gap: 12px; margin-top: 12px; }
+  .source-item { flex: 1; background: #16162a; border: 1px solid #2d2d44; border-radius: 10px; padding: 14px; text-align: center; }
+  .source-item .sv { font-size: 24px; font-weight: 700; }
+  .source-item .sl { font-size: 10px; color: #64748b; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+
   .footer { color: #334155; font-size: 12px; text-align: center; margin-top: 40px; }
 </style>
 </head>
 <body>
 <div class="page">
 
-  <!-- Header -->
   <div class="header">
     <h1>Achievee — Warm Audience Analysis</h1>
-    <p>WARM/subscribed lists · HubSpot + Mailchimp · Deduplicated unique contacts</p>
+    <p>WARM/subscribed lists · HubSpot + Mailchimp · Fully deduplicated unique contacts</p>
     <span class="badge">WARM SUBSCRIBERS</span>
     <span class="badge">2026-06-11</span>
   </div>
 
-  <!-- Stat cards -->
-  <div class="stats-row">
-    <div class="stat-card"><div class="val">45,065</div><div class="lbl">Unique Warm Subscribers</div></div>
-    <div class="stat-card"><div class="val">26,080</div><div class="lbl">Valid HR/People Contacts</div></div>
-    <div class="stat-card"><div class="val">19</div><div class="lbl">Persona Categories</div></div>
-    <div class="stat-card"><div class="val">45.4%</div><div class="lbl">Have Company Size Data</div></div>
+  <!-- Toggle -->
+  <div class="toggle-bar">
+    <label class="switch">
+      <input type="checkbox" id="unsubToggle" onchange="applyMode()">
+      <span class="slider"></span>
+    </label>
+    <span class="toggle-label">Include <strong>unsubscribed</strong> contacts &nbsp;</span>
+    <span class="unsub-pill" id="unsubPill">296 unsubscribed excluded</span>
+    <span style="margin-left:auto;font-size:12px;color:#475569;">Subscribed status always wins on duplicate emails</span>
   </div>
 
-  <!-- Row 1: Persona pie + Persona bar -->
+  <!-- Stat cards -->
+  <div class="stats-row">
+    <div class="stat-card"><div class="val" id="sc-total">45,065</div><div class="lbl">Unique Contacts</div><div class="sub-val" id="sc-unsub-note">+296 excl.</div></div>
+    <div class="stat-card"><div class="val" id="sc-valid">26,195</div><div class="lbl">Valid HR/People</div></div>
+    <div class="stat-card"><div class="val" id="sc-sub">44,912</div><div class="lbl">Subscribed</div></div>
+    <div class="stat-card"><div class="val">296</div><div class="lbl">Unsubscribed</div></div>
+    <div class="stat-card"><div class="val">45.4%</div><div class="lbl">Have Size Data</div></div>
+  </div>
+
+  <!-- Row 1: Persona pie + persona bars -->
   <div class="grid-2">
     <div class="card">
-      <h2>Persona Distribution (all)</h2>
-      <div class="chart-wrap"><canvas id="personaPie" height="280"></canvas></div>
+      <h2>Persona Distribution (all categories)</h2>
+      <canvas id="personaPie" height="280"></canvas>
     </div>
     <div class="card">
-      <h2>Valid HR/People Personas (% of 26,080)</h2>
+      <h2>Valid HR/People Personas (% of valid)</h2>
       <div id="personaBars"></div>
     </div>
   </div>
 
-  <!-- Row 2: Industry + Company Size + Geography -->
+  <!-- Row 2: Industry + Size + Geo -->
   <div class="grid-3">
     <div class="card">
       <h2>Top Industries</h2>
-      <div class="chart-wrap"><canvas id="industryChart" height="300"></canvas></div>
+      <canvas id="industryChart" height="300"></canvas>
     </div>
     <div class="card">
       <h2>Company Size</h2>
-      <p style="font-size:11px;color:#f59e0b;margin-bottom:12px;">⚠ Only 45.4% of contacts have size data (20,475 / 45,065) — percentages are of known only</p>
-      <div class="chart-wrap"><canvas id="sizeChart" height="300"></canvas></div>
+      <p class="note">⚠ Only ~45% of contacts have size data — % of known only</p>
+      <canvas id="sizeChart" height="260"></canvas>
     </div>
     <div class="card">
-      <h2>Geography (Top Countries)</h2>
-      <div class="chart-wrap"><canvas id="geoChart" height="300"></canvas></div>
+      <h2>Top Countries</h2>
+      <canvas id="geoChart" height="300"></canvas>
     </div>
   </div>
 
-  <!-- Row 3: Source split + Persona legend table -->
+  <!-- Row 3: Source + Table -->
   <div class="grid-2">
     <div class="card">
       <h2>Data Source Split</h2>
-      <div class="chart-wrap"><canvas id="sourceChart" height="200"></canvas></div>
-      <div class="source-block" style="margin-top:16px;">
-        <div class="source-item"><div class="sv" style="color:#6366f1;">41,406</div><div class="sl">HubSpot</div></div>
-        <div class="source-item"><div class="sv" style="color:#f59e0b;">3,659</div><div class="sl">Mailchimp</div></div>
+      <canvas id="sourceChart" height="180"></canvas>
+      <div class="source-block">
+        <div class="source-item"><div class="sv" style="color:#6366f1;" id="hs-count">41,406</div><div class="sl">HubSpot</div></div>
+        <div class="source-item"><div class="sv" style="color:#f59e0b;" id="mc-count">3,659</div><div class="sl">Mailchimp</div></div>
       </div>
     </div>
-    <div class="card">
-      <h2>Persona Breakdown — Full Table</h2>
+    <div class="card" style="overflow-y:auto;max-height:520px;">
+      <h2>Full Persona Table</h2>
       <table class="legend-table">
-        <thead><tr><th></th><th>Persona</th><th>Count</th><th>% of All</th></tr></thead>
+        <thead><tr><th></th><th>Persona</th><th style="text-align:right">Count</th><th style="text-align:right">% of All</th></tr></thead>
         <tbody id="personaTableBody"></tbody>
       </table>
     </div>
   </div>
 
-  <!-- Row 4: Targeting summary -->
+  <!-- Row 4: Target personas -->
   <div class="full card">
     <h2>ICP Signal — Target Personas (top 80% of valid warm)</h2>
     <div id="targetBars"></div>
   </div>
 
-  <div class="footer">Generated by Valcat · Achievee Warm Audience Analysis · 45,065 unique contacts from HubSpot + Mailchimp</div>
+  <div class="footer">Generated by Valcat · Achievee Warm Audience · 45,361 total unique contacts (HubSpot + Mailchimp)</div>
 </div>
 
 <script>
-// ─── DATA ───────────────────────────────────────────────────────────────────
-
-const TOTAL = 45065;
-const VALID_TOTAL = 26080; // excl Exclude, No Title, Other/OOS
-
-const personaData = {
-  'HR Director':              8357,
-  'Other HR / People':        3362,
-  'VP HR / Head of People':   2826,
-  'HR Manager':               2206,
-  'L&D / Training':           1634,
-  'COO / Chief of Staff':     1172,
-  'HRBP':                     1148,
-  'HR Generalist':            1118,
-  'CHRO / CPO / Chief People': 941,
-  'Total Rewards / Benefits':  823,
-  'Employee Experience':        770,
-  'DEI / Diversity':            420,
-  'Talent Management':          410,
-  'SVP / EVP HR':               376,
-  'People Ops':                 319,
-  'Org Development':            198,
-  // Noise
-  'Other / Out of Scope':    11549,
-  'Exclude':                  5994,
-  'No Title':                 1442,
+// ── Raw data from Python ──────────────────────────────────────────────────────
+const DATA = {
+  sub: {
+    total: 45065,
+    personas: {"Other / Out of Scope":11549,"HR Director":8357,"Exclude":5994,"Other HR / People":3362,"VP HR / Head of People":2826,"HR Manager":2206,"L&D / Training":1634,"No Title":1442,"COO / Chief of Staff":1172,"HRBP":1148,"HR Generalist":1118,"CHRO / CPO / Chief People":941,"Total Rewards / Benefits":823,"Employee Experience":770,"DEI / Diversity":420,"Talent Management":410,"SVP / EVP HR":376,"People Ops":319,"Org Development":198},
+    valid_personas: {"HR Director":8357,"Other HR / People":3362,"VP HR / Head of People":2826,"HR Manager":2206,"L&D / Training":1634,"COO / Chief of Staff":1172,"HRBP":1148,"HR Generalist":1118,"CHRO / CPO / Chief People":941,"Total Rewards / Benefits":823,"Employee Experience":770,"DEI / Diversity":420,"Talent Management":410,"SVP / EVP HR":376,"People Ops":319,"Org Development":198},
+    industries: {"Healthcare":2560,"Software / Tech":1911,"Higher Education":1056,"Government Administration":965,"Manufacturing":851,"Financial Services":721,"Business Services":713,"Insurance":666,"Education":630,"Retail":541,"Construction":434},
+    sizes: {"1001-5000":4115,"10001+":3538,"51-200":3348,"201-500":2660,"1-10":2267,"501-1000":1689,"11-50":1237,"5001-10000":902,"1-50":719},
+    geos: {"United States":27598,"Canada":1853,"India":499,"United Kingdom":431,"Australia":229,"South Africa":192,"Germany":129},
+    sources: {"HubSpot":41406,"Mailchimp":3659},
+  },
+  all: {
+    total: 45361,
+    personas: {"Other / Out of Scope":11668,"HR Director":8392,"Exclude":6039,"Other HR / People":3374,"VP HR / Head of People":2846,"HR Manager":2212,"L&D / Training":1635,"No Title":1448,"COO / Chief of Staff":1177,"HRBP":1150,"HR Generalist":1121,"CHRO / CPO / Chief People":959,"Total Rewards / Benefits":829,"Employee Experience":771,"DEI / Diversity":420,"Talent Management":411,"SVP / EVP HR":384,"People Ops":327,"Org Development":198},
+    valid_personas: {"HR Director":8392,"Other HR / People":3374,"VP HR / Head of People":2846,"HR Manager":2212,"L&D / Training":1635,"COO / Chief of Staff":1177,"HRBP":1150,"HR Generalist":1121,"CHRO / CPO / Chief People":959,"Total Rewards / Benefits":829,"Employee Experience":771,"DEI / Diversity":420,"Talent Management":411,"SVP / EVP HR":384,"People Ops":327,"Org Development":198},
+    industries: {"Healthcare":2560,"Software / Tech":1921,"Higher Education":1056,"Government Administration":965,"Manufacturing":852,"Financial Services":722,"Business Services":713,"Insurance":666,"Education":630,"Retail":542,"Construction":434},
+    sizes: {"1001-5000":4115,"10001+":3538,"51-200":3348,"201-500":2660,"1-10":2267,"501-1000":1689,"11-50":1237,"5001-10000":902,"1-50":719},
+    geos: {"United States":27598,"Canada":1853,"India":499,"United Kingdom":431,"Australia":229,"South Africa":192,"Germany":129},
+    sources: {"HubSpot":41406,"Mailchimp":3955},
+  }
 };
 
-// Valid (targetable) personas only
-const validPersonas = Object.fromEntries(
-  Object.entries(personaData).filter(([k]) => !['Other / Out of Scope','Exclude','No Title'].includes(k))
-);
-
-// Merged industries (exclude Unknown/NA)
-const industryData = {
-  'Software / Tech':          1457,
-  'Higher Education':         1056,
-  'Government Administration': 965,
-  'Healthcare':               1393,
-  'Manufacturing':             851,
-  'Financial Services':        721,
-  'Business Services':         713,
-  'Insurance':                 666,
-  'Education':                 630,
-  'Retail':                    541,
-  'Construction':              434,
-};
-
-// Fixed: re-normalised with correct format handling (<20, >10,000, 1K-5K, 10K+, Nov-50 etc.)
-// Only 45.4% of contacts (20,475) have size data — percentages are of KNOWN only
-const sizeData = {
-  '1–50':          4223,   // 1-10 + 11-50 + <20
-  '51–200':        3348,   // 51-100 + 101-250 + 51-200
-  '201–500':       2660,   // 201-500 + 251-500
-  '501–1,000':     1689,
-  '1,001–5,000':   4115,
-  '5,001–10,000':   902,   // >5000 + 5001-10000
-  '10,001+':       3538,
-};
-
-// Normalized geography
-const geoData = {
-  'United States': 27598,
-  'Canada':         1853,
-  'India':           499,
-  'United Kingdom':  366,
-  'Australia':       121,
-  'South Africa':    121,
-};
-
-const COLORS = [
-  '#6366f1','#8b5cf6','#a78bfa','#c4b5fd',
-  '#f59e0b','#fbbf24','#34d399','#10b981',
-  '#fb923c','#f87171','#38bdf8','#60a5fa',
-  '#e879f9','#f472b6','#4ade80','#22d3ee',
-  '#facc15','#a3e635','#fb7185',
-];
+const COLORS = ['#6366f1','#8b5cf6','#a78bfa','#c4b5fd','#f59e0b','#fbbf24','#34d399','#10b981','#fb923c','#f87171','#38bdf8','#60a5fa','#e879f9','#f472b6','#4ade80','#22d3ee','#facc15','#a3e635','#fb7185'];
 const NOISE_COLORS = ['#475569','#334155','#1e293b'];
+const NOISE = new Set(['Other / Out of Scope','Exclude','No Title']);
 
-// ─── PERSONA PIE ─────────────────────────────────────────────────────────────
-const pieLabels = Object.keys(personaData);
-const pieValues = Object.values(personaData);
-const pieColors = pieLabels.map((l, i) => {
-  if (l === 'Other / Out of Scope') return NOISE_COLORS[0];
-  if (l === 'Exclude')              return NOISE_COLORS[1];
-  if (l === 'No Title')             return NOISE_COLORS[2];
-  return COLORS[i % COLORS.length];
-});
+const SIZE_LABELS = {'1-50':'1–50 (<20)','1-10':'1–10','11-50':'11–50','51-200':'51–200','201-500':'201–500','501-1000':'501–1,000','1001-5000':'1,001–5,000','5001-10000':'5,001–10,000','10001+':'10,001+'};
+const SIZE_ORDER  = ['1-50','1-10','11-50','51-200','201-500','501-1000','1001-5000','5001-10000','10001+'];
 
-new Chart(document.getElementById('personaPie'), {
-  type: 'doughnut',
-  data: { labels: pieLabels, datasets: [{ data: pieValues, backgroundColor: pieColors, borderWidth: 1, borderColor: '#0f0f17' }] },
-  options: {
-    cutout: '60%',
-    plugins: {
-      legend: { display: false },
-      tooltip: {
-        callbacks: {
-          label: ctx => ` ${ctx.label}: ${ctx.raw.toLocaleString()} (${(ctx.raw/TOTAL*100).toFixed(1)}%)`
-        }
-      }
+let mode = 'sub'; // 'sub' | 'all'
+let charts = {};
+
+function d(key) { return DATA[mode][key]; }
+
+// ── Chart helpers ─────────────────────────────────────────────────────────────
+function destroyAll() { Object.values(charts).forEach(c => c.destroy()); charts = {}; }
+
+function mkPersonaPie(data, total) {
+  const labels = Object.keys(data);
+  const values = Object.values(data);
+  const colors = labels.map((l,i) => NOISE.has(l) ? NOISE_COLORS[['Other / Out of Scope','Exclude','No Title'].indexOf(l)] : COLORS[i % COLORS.length]);
+  charts.pie = new Chart(document.getElementById('personaPie'), {
+    type: 'doughnut',
+    data: { labels, datasets: [{ data: values, backgroundColor: colors, borderWidth: 1, borderColor: '#0f0f17' }] },
+    options: { cutout:'60%', plugins: { legend:{display:false}, tooltip:{callbacks:{label:c=>` ${c.label}: ${c.raw.toLocaleString()} (${(c.raw/total*100).toFixed(1)}%)`}} } }
+  });
+}
+
+function mkPersonaBars(validPersonas) {
+  const el = document.getElementById('personaBars');
+  el.innerHTML = '';
+  const total = Object.values(validPersonas).reduce((a,b)=>a+b,0);
+  Object.entries(validPersonas).forEach(([name,count],i) => {
+    const pct = (count/total*100).toFixed(1);
+    const color = COLORS[i % COLORS.length];
+    el.innerHTML += `<div class="bar-row"><div class="bar-label"><span>${name}</span><span style="color:${color};font-weight:600;">${pct}%  <span style="color:#475569;font-weight:400;">(${count.toLocaleString()})</span></span></div><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${color};"></div></div></div>`;
+  });
+}
+
+function mkHBar(id, labels, values, height=300) {
+  const knownTotal = values.reduce((a,b)=>a+b,0);
+  charts[id] = new Chart(document.getElementById(id), {
+    type: 'bar',
+    data: { labels, datasets: [{ data: values, backgroundColor: COLORS.slice(0,labels.length), borderRadius:4, borderSkipped:false }] },
+    options: {
+      indexAxis:'y',
+      plugins: { legend:{display:false}, tooltip:{callbacks:{label:c=>` ${c.raw.toLocaleString()} (${(c.raw/knownTotal*100).toFixed(1)}%)`}} },
+      scales: { x:{grid:{color:'#2d2d44'},ticks:{color:'#64748b',font:{size:10}}}, y:{grid:{display:false},ticks:{color:'#94a3b8',font:{size:11}}} }
     }
+  });
+}
+
+function mkDonut(id, labels, values) {
+  const total = values.reduce((a,b)=>a+b,0);
+  charts[id] = new Chart(document.getElementById(id), {
+    type: 'doughnut',
+    data: { labels, datasets: [{ data: values, backgroundColor: COLORS.slice(0,labels.length), borderWidth:1, borderColor:'#0f0f17' }] },
+    options: { cutout:'55%', plugins: { legend:{display:true,position:'bottom',labels:{color:'#94a3b8',font:{size:10},boxWidth:10,padding:6}}, tooltip:{callbacks:{label:c=>` ${c.label}: ${c.raw.toLocaleString()} (${(c.raw/total*100).toFixed(1)}%)`}} } }
+  });
+}
+
+function mkSourceChart(sources) {
+  const labels = Object.keys(sources);
+  const values = Object.values(sources);
+  const total  = values.reduce((a,b)=>a+b,0);
+  charts.source = new Chart(document.getElementById('sourceChart'), {
+    type: 'doughnut',
+    data: { labels, datasets: [{ data: values, backgroundColor:['#6366f1','#f59e0b'], borderWidth:1, borderColor:'#0f0f17' }] },
+    options: { cutout:'65%', plugins: { legend:{display:true,position:'bottom',labels:{color:'#94a3b8',font:{size:12},boxWidth:12,padding:10}}, tooltip:{callbacks:{label:c=>` ${c.label}: ${c.raw.toLocaleString()} (${(c.raw/total*100).toFixed(1)}%)`}} } }
+  });
+  document.getElementById('hs-count').textContent = (sources['HubSpot']||0).toLocaleString();
+  document.getElementById('mc-count').textContent = (sources['Mailchimp']||0).toLocaleString();
+}
+
+function mkPersonaTable(personas, total) {
+  const tbody = document.getElementById('personaTableBody');
+  tbody.innerHTML = '';
+  Object.entries(personas).sort((a,b)=>b[1]-a[1]).forEach(([name,count],i) => {
+    const isNoise = NOISE.has(name);
+    const color   = isNoise ? NOISE_COLORS[['Other / Out of Scope','Exclude','No Title'].indexOf(name)] : COLORS[i % COLORS.length];
+    tbody.innerHTML += `<tr><td><span class="dot" style="background:${color}"></span></td><td>${name}</td><td style="color:${color};font-weight:600;text-align:right;">${count.toLocaleString()}</td><td style="color:#64748b;text-align:right;">${(count/total*100).toFixed(1)}%</td></tr>`;
+  });
+}
+
+function mkTargetBars(validPersonas) {
+  const entries = Object.entries(validPersonas).slice(0, 8); // top 8
+  const targetTotal = entries.reduce((s,[,n])=>s+n,0);
+  const el = document.getElementById('targetBars');
+  el.innerHTML = '';
+  let cum = 0;
+  entries.forEach(([name,count],i) => {
+    const pct = (count/targetTotal*100).toFixed(1);
+    cum += parseFloat(pct);
+    const color = COLORS[i];
+    el.innerHTML += `<div class="bar-row"><div class="bar-label"><span><span class="dot" style="background:${color};display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:7px;"></span>${name}</span><span style="color:#64748b;font-size:11px;">${count.toLocaleString()} &nbsp;·&nbsp; <span style="color:${color};font-weight:600;">${pct}%</span> &nbsp;·&nbsp; cumulative ${cum.toFixed(0)}%</span></div><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${color};"></div></div></div>`;
+  });
+}
+
+function renderAll() {
+  destroyAll();
+  const data = DATA[mode];
+  const total = data.total;
+  const validTotal = Object.values(data.valid_personas).reduce((a,b)=>a+b,0);
+
+  // Stats
+  document.getElementById('sc-total').textContent = total.toLocaleString();
+  document.getElementById('sc-valid').textContent = validTotal.toLocaleString();
+  document.getElementById('sc-sub').textContent = (45065).toLocaleString(); // subscribed always same
+  document.getElementById('sc-unsub-note').textContent = mode === 'sub' ? '+296 excl.' : '296 included';
+
+  // Persona pie
+  mkPersonaPie(data.personas, total);
+  mkPersonaBars(data.valid_personas);
+
+  // Industry — consolidate Unknown
+  const indData = {...data.industries};
+  delete indData['Unknown'];
+  const indLabels = Object.keys(indData);
+  const indValues = Object.values(indData);
+  mkHBar('industryChart', indLabels, indValues);
+
+  // Size — merge 1-50 into 1-10 bucket for display, ordered
+  const rawSizes = data.sizes;
+  const mergedSizes = {};
+  SIZE_ORDER.forEach(k => {
+    const label = SIZE_LABELS[k];
+    if (rawSizes[k]) mergedSizes[label] = (mergedSizes[label]||0) + rawSizes[k];
+  });
+  mkDonut('sizeChart', Object.keys(mergedSizes), Object.values(mergedSizes));
+
+  // Geo
+  mkHBar('geoChart', Object.keys(data.geos), Object.values(data.geos));
+
+  // Source
+  mkSourceChart(data.sources);
+
+  // Table
+  mkPersonaTable(data.personas, total);
+
+  // Target bars
+  mkTargetBars(data.valid_personas);
+}
+
+function applyMode() {
+  const checked = document.getElementById('unsubToggle').checked;
+  mode = checked ? 'all' : 'sub';
+  const pill = document.getElementById('unsubPill');
+  if (checked) {
+    pill.textContent = '296 unsubscribed included';
+    pill.className = 'unsub-pill on';
+  } else {
+    pill.textContent = '296 unsubscribed excluded';
+    pill.className = 'unsub-pill';
   }
-});
+  renderAll();
+}
 
-// ─── VALID PERSONA BARS ───────────────────────────────────────────────────────
-const personaBarsEl = document.getElementById('personaBars');
-const sortedValid = Object.entries(validPersonas).sort((a,b)=>b[1]-a[1]);
-sortedValid.forEach(([name, count], i) => {
-  const pct = (count / VALID_TOTAL * 100).toFixed(1);
-  const color = COLORS[i % COLORS.length];
-  personaBarsEl.innerHTML += `
-    <div class="bar-row">
-      <div class="bar-label"><span>${name}</span><span style="color:${color};font-weight:600;">${pct}%</span></div>
-      <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${color};"></div></div>
-    </div>`;
-});
-
-// ─── PERSONA TABLE ────────────────────────────────────────────────────────────
-const tbody = document.getElementById('personaTableBody');
-Object.entries(personaData).sort((a,b)=>b[1]-a[1]).forEach(([name, count], i) => {
-  const isNoise = ['Other / Out of Scope','Exclude','No Title'].includes(name);
-  const color = isNoise ? NOISE_COLORS[['Other / Out of Scope','Exclude','No Title'].indexOf(name)] : COLORS[i % COLORS.length];
-  const pct = (count / TOTAL * 100).toFixed(1);
-  tbody.innerHTML += `
-    <tr class="persona-row">
-      <td><span class="dot" style="background:${color}"></span></td>
-      <td>${name}</td>
-      <td style="color:${color};font-weight:600;text-align:right;">${count.toLocaleString()}</td>
-      <td style="color:#64748b;text-align:right;">${pct}%</td>
-    </tr>`;
-});
-
-// ─── INDUSTRY CHART ───────────────────────────────────────────────────────────
-const indKnownTotal = Object.values(industryData).reduce((a,b)=>a+b,0);
-new Chart(document.getElementById('industryChart'), {
-  type: 'bar',
-  data: {
-    labels: Object.keys(industryData),
-    datasets: [{
-      data: Object.values(industryData),
-      backgroundColor: COLORS.slice(0, Object.keys(industryData).length),
-      borderRadius: 4, borderSkipped: false,
-    }]
-  },
-  options: {
-    indexAxis: 'y',
-    plugins: {
-      legend: { display: false },
-      tooltip: { callbacks: { label: ctx => ` ${ctx.raw.toLocaleString()} contacts (${(ctx.raw/indKnownTotal*100).toFixed(1)}% of known)` } }
-    },
-    scales: {
-      x: { grid: { color: '#2d2d44' }, ticks: { color: '#64748b', font: { size: 10 } } },
-      y: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 11 } } }
-    }
-  }
-});
-
-// ─── SIZE CHART ───────────────────────────────────────────────────────────────
-const sizeKnownTotal = Object.values(sizeData).reduce((a,b)=>a+b,0);
-new Chart(document.getElementById('sizeChart'), {
-  type: 'doughnut',
-  data: {
-    labels: Object.keys(sizeData),
-    datasets: [{
-      data: Object.values(sizeData),
-      backgroundColor: COLORS.slice(0, Object.keys(sizeData).length),
-      borderWidth: 1, borderColor: '#0f0f17'
-    }]
-  },
-  options: {
-    cutout: '55%',
-    plugins: {
-      legend: {
-        display: true, position: 'bottom',
-        labels: { color: '#94a3b8', font: { size: 10 }, boxWidth: 10, padding: 8 }
-      },
-      tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.raw.toLocaleString()} (${(ctx.raw/sizeKnownTotal*100).toFixed(1)}%)` } }
-    }
-  }
-});
-
-// ─── GEO CHART ───────────────────────────────────────────────────────────────
-const geoKnownTotal = Object.values(geoData).reduce((a,b)=>a+b,0);
-new Chart(document.getElementById('geoChart'), {
-  type: 'bar',
-  data: {
-    labels: Object.keys(geoData),
-    datasets: [{
-      data: Object.values(geoData),
-      backgroundColor: ['#6366f1','#8b5cf6','#f59e0b','#34d399','#fb923c','#f87171'],
-      borderRadius: 4, borderSkipped: false,
-    }]
-  },
-  options: {
-    indexAxis: 'y',
-    plugins: {
-      legend: { display: false },
-      tooltip: { callbacks: { label: ctx => ` ${ctx.raw.toLocaleString()} (${(ctx.raw/geoKnownTotal*100).toFixed(1)}% of known)` } }
-    },
-    scales: {
-      x: { grid: { color: '#2d2d44' }, ticks: { color: '#64748b', font: { size: 10 } } },
-      y: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 12 } } }
-    }
-  }
-});
-
-// ─── SOURCE CHART ─────────────────────────────────────────────────────────────
-new Chart(document.getElementById('sourceChart'), {
-  type: 'doughnut',
-  data: {
-    labels: ['HubSpot', 'Mailchimp'],
-    datasets: [{ data: [41406, 3659], backgroundColor: ['#6366f1','#f59e0b'], borderWidth: 1, borderColor: '#0f0f17' }]
-  },
-  options: {
-    cutout: '65%',
-    plugins: {
-      legend: {
-        display: true, position: 'bottom',
-        labels: { color: '#94a3b8', font: { size: 12 }, boxWidth: 12, padding: 12 }
-      },
-      tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.raw.toLocaleString()} (${(ctx.raw/TOTAL*100).toFixed(1)}%)` } }
-    }
-  }
-});
-
-// ─── TARGET PERSONAS BARS ─────────────────────────────────────────────────────
-const targetPersonas = [
-  ['HR Director',              8357],
-  ['Other HR / People',        3362],
-  ['VP HR / Head of People',   2826],
-  ['HR Manager',               2206],
-  ['L&D / Training',           1634],
-  ['COO / Chief of Staff',     1172],
-  ['HRBP',                     1148],
-  ['HR Generalist',            1118],
-];
-const targetTotal = targetPersonas.reduce((s,[,n])=>s+n,0);
-const targetBarsEl = document.getElementById('targetBars');
-let cumulative = 0;
-targetPersonas.forEach(([name, count], i) => {
-  const pct = (count / targetTotal * 100).toFixed(1);
-  cumulative += parseFloat(pct);
-  const color = COLORS[i];
-  targetBarsEl.innerHTML += `
-    <div class="bar-row">
-      <div class="bar-label">
-        <span><span class="dot" style="background:${color};display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:8px;"></span>${name}</span>
-        <span style="color:#64748b;font-size:11px;">${count.toLocaleString()} &nbsp;·&nbsp; <span style="color:${color};font-weight:600;">${pct}%</span> &nbsp;·&nbsp; cumulative ${cumulative.toFixed(0)}%</span>
-      </div>
-      <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${color};"></div></div>
-    </div>`;
-});
+// Initial render
+renderAll();
 </script>
 </body>
 </html>
